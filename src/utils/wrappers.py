@@ -1,5 +1,6 @@
 from toymeta.dark_room import DarkRoom
-from env_batch import ParallelEnvBatch
+
+from src.utils.env_batch import ParallelEnvBatch
 
 # the following code is adapted from https://github.com/yandexdataschool/Practical_RL
 

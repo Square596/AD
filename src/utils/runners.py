@@ -1,6 +1,7 @@
 """ RL env runner """
-import numpy as np
 from collections import defaultdict
+
+import numpy as np
 
 # the following code is from https://github.com/yandexdataschool/Practical_RL
 
