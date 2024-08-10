@@ -9,7 +9,7 @@ from torch.distributions import Categorical
 
 class MLP_model(nn.Module):
     def __init__(self, input_dim, emb_dim, n_actions):
-        super().__init__(self)
+        super().__init__()
         self.emb = nn.Embedding(input_dim, emb_dim)
         self.norm1 = nn.BatchNorm1d(emb_dim)
         self.act1 = nn.Tanh()
@@ -29,6 +29,7 @@ class MLP_model(nn.Module):
         ]))
     
     def forward(self, inp):
+        inp = torch.from_numpy(inp)
         out = self.act1(self.norm1(self.emb(inp)))
 
         values = self.critic(out)
@@ -42,7 +43,7 @@ class Policy:
         self.model = model
 
     def act(self, inputs):
-        logits, values = self.model(inputs)
+        values, logits = self.model(inputs)
 
         distributions = Categorical(logits=logits)
         actions = np.array(distributions.mode)
