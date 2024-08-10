@@ -47,6 +47,7 @@ class EnvRunner:
         observations = []
         rewards = []
         resets = []
+        timesteps = []
         self.state["env_steps"] = self.nsteps
 
         for i in range(self.nsteps):
@@ -60,13 +61,14 @@ class EnvRunner:
             for key, val in act.items():
                 trajectory[key].append(val)
 
-            obs, rew, terminated, truncated, _ = self.env.step(
+            obs, rew, terminated, truncated, info = self.env.step(
                 trajectory["actions"][-1]
             )
             self.state["latest_observation"] = obs
             rewards.append(rew)
             reset = np.logical_or(terminated, truncated)
             resets.append(reset)
+            timesteps.append(np.stack(list(map(lambda x: x["tmp"], info))))
             self.step_var += self.nenvs or 1
 
             # Only reset if the env is not batched. Batched envs should
@@ -75,7 +77,7 @@ class EnvRunner:
                 self.state["env_steps"] = i + 1
                 self.state["latest_observation"] = self.env.reset()[0]
 
-        trajectory.update(observations=observations, rewards=rewards, resets=resets)
+        trajectory.update(observations=observations, rewards=rewards, resets=resets, timesteps=timesteps)
         trajectory["state"] = self.state
 
         for transform in self.transforms:
