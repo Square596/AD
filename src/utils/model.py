@@ -17,34 +17,15 @@ class MLP_model(nn.Module):
         self.norm1 = nn.BatchNorm1d(emb_dim)
         self.act1 = nn.Tanh()
 
-        self.critic = nn.Sequential(
-            OrderedDict(
-                [
-                    ("lin", nn.Linear(emb_dim, emb_dim)),
-                    ("norm", nn.BatchNorm1d(emb_dim)),
-                    ("tanh", nn.Tanh()),
-                    ("values", nn.Linear(emb_dim, 1)),
-                ]
-            )
-        )
-
-        self.actor = nn.Sequential(
-            OrderedDict(
-                [
-                    ("lin", nn.Linear(emb_dim, emb_dim)),
-                    ("norm", nn.BatchNorm1d(emb_dim)),
-                    ("tanh", nn.Tanh()),
-                    ("logits", nn.Linear(emb_dim, n_actions)),
-                ]
-            )
-        )
+        self.actor_critic = nn.Linear(emb_dim, n_actions + 1)
 
     def forward(self, inp):
         inp = torch.from_numpy(inp)
         out = self.act1(self.norm1(self.emb(inp)))
+        out = self.actor_critic(out)
 
-        values = self.critic(out)
-        logits = self.actor(out)
+        values = out[:, 0]
+        logits = out[:, 1:]
 
         return values, logits
 
@@ -59,8 +40,9 @@ class Policy:
         values, logits = self.model(inputs)
 
         distributions = Categorical(logits=logits)
-        actions = np.array(distributions.mode)
-        log_probs = distributions.log_prob(distributions.mode)
+        actions = distributions.sample()
+        log_probs = distributions.log_prob(actions)
+        actions = np.array(actions)
 
         return {
             "actions": actions,

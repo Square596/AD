@@ -20,7 +20,7 @@ def visualize_policy(policy, num_steps=30):
         plt.imshow(env.render())
         plt.show()
         time.sleep(0.2)
-        a = policy.act(np.array([s]))["actions"][0]
+        a = int(policy.model(np.array([s]))[1].argmax())
         s, r, term, trunc, _ = env.step(a)
         if term or trunc:
             break
