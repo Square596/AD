@@ -9,19 +9,19 @@ class DarkRoom_with_time(DarkRoom):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.time = None
-    
+
     def reset(self, *args, **kwargs):
         s, info = super().reset(*args, **kwargs)
         self.time = 1
-        info['tmp'] = self.time
+        info["tmp"] = self.time
         return s, info
-    
+
     def step(self, *args, **kwargs):
         s, r, terminated, truncated, info = super().step(*args, **kwargs)
         self.time += 1
-        info['tmp'] = self.time
+        info["tmp"] = self.time
         return s, r, terminated, truncated, info
-    
+
 
 class _thunk:
     def __init__(self, **kwargs):
@@ -37,11 +37,11 @@ def make_parallel_env(nenvs=None, seed=None, **kwargs):
             seed = [seed] * nenvs
         if len(seed) != nenvs:
             raise ValueError("len(seed) != nenvs")
-        
+
         thunks = [_thunk(**kwargs) for _ in range(nenvs)]
         env = ParallelEnvBatch(make_env=thunks, seeds=seed)
         return env
-    
+
     env = DarkRoom_with_time(**kwargs)
 
     return env

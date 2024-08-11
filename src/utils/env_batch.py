@@ -15,11 +15,23 @@ class SpaceBatch(Space):
         first_dtype = spaces[0].dtype
         for space in spaces:
             if not isinstance(space, first_type):
-                raise TypeError("spaces have different types: {}, {}".format(first_type, type(space)))
+                raise TypeError(
+                    "spaces have different types: {}, {}".format(
+                        first_type, type(space)
+                    )
+                )
             if first_shape != space.shape:
-                raise ValueError("spaces have different shapes: {}, {}".format(first_shape, space.shape))
+                raise ValueError(
+                    "spaces have different shapes: {}, {}".format(
+                        first_shape, space.shape
+                    )
+                )
             if first_dtype != space.dtype:
-                raise ValueError("spaces have different data types: {}, {}".format(first_dtype, space.dtype))
+                raise ValueError(
+                    "spaces have different data types: {}, {}".format(
+                        first_dtype, space.dtype
+                    )
+                )
         self.spaces = spaces
         super().__init__(shape=self.spaces[0].shape, dtype=self.spaces[0].dtype)
 
@@ -39,7 +51,9 @@ class EnvBatch(Env):
 
     def _get_make_env_functions(self, make_env, nenvs):
         if nenvs is None and not isinstance(make_env, list):
-            raise ValueError("When nenvs is None make_env" " must be a list of callables")
+            raise ValueError(
+                "When nenvs is None make_env" " must be a list of callables"
+            )
         if nenvs is not None and not callable(make_env):
             raise ValueError("When nenvs is not None make_env must be callable")
         if nenvs is not None:
@@ -56,11 +70,21 @@ class EnvBatch(Env):
 
     def _check_actions(self, actions):
         if not len(actions) == self.nenvs:
-            raise ValueError("number of actions is not equal to number of envs: len(actions) = {}, nenvs = {}".format(len(actions), self.nenvs))
+            raise ValueError(
+                "number of actions is not equal to number of envs: len(actions) = {}, nenvs = {}".format(
+                    len(actions), self.nenvs
+                )
+            )
 
     def step(self, actions):
         self._check_actions(actions)
-        observations, rewards, terminated_list, truncated_list, infos = [], [], [], [], []
+        observations, rewards, terminated_list, truncated_list, infos = (
+            [],
+            [],
+            [],
+            [],
+            [],
+        )
         for env, action in zip(self._envs, actions):
             obs, rew, terminated, truncated, info = env.step(action)
             if terminated or truncated:
@@ -70,7 +94,13 @@ class EnvBatch(Env):
             terminated_list.append(terminated)
             truncated_list.append(truncated)
             infos.append(info)
-        return (np.stack(observations), np.stack(rewards), np.stack(terminated_list), np.stack(truncated_list), infos)
+        return (
+            np.stack(observations),
+            np.stack(rewards),
+            np.stack(terminated_list),
+            np.stack(truncated_list),
+            infos,
+        )
 
     def reset(self, **kwargs):
         observations, infos = [], []
@@ -100,7 +130,13 @@ class SingleEnvBatch(Wrapper, EnvBatch):
         obs, rew, terminated, truncated, info = self.env.step(actions[0])
         if terminated or truncated:
             obs, info = self.env.reset()
-        return (obs[None], np.expand_dims(rew, 0), np.expand_dims(terminated, 0), np.expand_dims(truncated, 0), [info])
+        return (
+            obs[None],
+            np.expand_dims(rew, 0),
+            np.expand_dims(terminated, 0),
+            np.expand_dims(truncated, 0),
+            [info],
+        )
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
@@ -135,6 +171,7 @@ class ParallelEnvBatch(EnvBatch):
     """
     An abstract batch of environments.
     """
+
     def __init__(self, make_env, nenvs=None, seeds=None):
         make_env_functions = self._get_make_env_functions(make_env, nenvs)
         self._nenvs = len(make_env_functions)
@@ -143,8 +180,18 @@ class ParallelEnvBatch(EnvBatch):
         )
         self._seeds = seeds or list(range(self._envs))
         self._processes = [
-            Process(target=worker, args=(parent_connection, worker_connection, make_env), daemon=True)
-            for i, (parent_connection, worker_connection, make_env) in enumerate(zip(self._parent_connections, self._worker_connections, make_env_functions))
+            Process(
+                target=worker,
+                args=(parent_connection, worker_connection, make_env),
+                daemon=True,
+            )
+            for i, (parent_connection, worker_connection, make_env) in enumerate(
+                zip(
+                    self._parent_connections,
+                    self._worker_connections,
+                    make_env_functions,
+                )
+            )
         ]
         for p in self._processes:
             p.start()
@@ -171,7 +218,13 @@ class ParallelEnvBatch(EnvBatch):
             conn.send(("step", a))
         results = [conn.recv() for conn in self._parent_connections]
         obs, rews, terminated, truncated, infos = zip(*results)
-        return (np.stack(obs), np.stack(rews), np.stack(terminated), np.stack(truncated), infos)
+        return (
+            np.stack(obs),
+            np.stack(rews),
+            np.stack(terminated),
+            np.stack(truncated),
+            infos,
+        )
 
     def reset(self, **kwargs):
         for env_idx, conn in enumerate(self._parent_connections):

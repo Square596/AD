@@ -1,4 +1,5 @@
 """ RL env runner """
+
 from collections import defaultdict
 
 import numpy as np
@@ -10,6 +11,7 @@ class EnvRunner:
     """
     Reinforcement learning runner in an environment with given policy
     """
+
     def __init__(self, env, policy, nsteps, transforms=None, step_var=None):
         self.env = env
         self.policy = policy
@@ -77,7 +79,12 @@ class EnvRunner:
                 self.state["env_steps"] = i + 1
                 self.state["latest_observation"] = self.env.reset()[0]
 
-        trajectory.update(observations=observations, rewards=rewards, resets=resets, timesteps=timesteps)
+        trajectory.update(
+            observations=observations,
+            rewards=rewards,
+            resets=resets,
+            timesteps=timesteps,
+        )
         trajectory["state"] = self.state
 
         for transform in self.transforms:
