@@ -9,6 +9,9 @@ __pycache__/
 #tensorboard logs
 logs/*
 
+#env videos
+Videos/*
+
 .DS_Store
 
 # C extensions
