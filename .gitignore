@@ -3,14 +3,14 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-#jupyter notebooks
-*.ipynb
-
 #tensorboard logs
-logs/*
+src/logs/*
 
 #env videos
-Videos/*
+src/videos/*
+
+#train histories
+src/histories/*
 
 .DS_Store
 

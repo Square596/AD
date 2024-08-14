@@ -120,7 +120,7 @@ class TensorboardSummaries(SummariesBase):
 
     def __init__(self, env, prefix=None, running_mean_size=10, step_var=None):
         super().__init__(env, prefix, running_mean_size, step_var)
-        self.writer = SummaryWriter(f"logs/{self.prefix}")
+        self.writer = SummaryWriter(f"src/logs/{self.prefix}")
 
     def add_summary(self, name, value):
         if isinstance(value, dict):
@@ -130,11 +130,12 @@ class TensorboardSummaries(SummariesBase):
 
 
 class _thunk:
-    def __init__(self, **kwargs):
+    def __init__(self, goal, **kwargs):
+        self.goal = goal
         self.kwargs = kwargs
 
     def __call__(self):
-        return make_parallel_env(**self.kwargs)
+        return make_parallel_env(goal=self.goal, **self.kwargs)
 
 
 def make_parallel_env(
@@ -146,11 +147,12 @@ def make_parallel_env(
         if len(seed) != nenvs:
             raise ValueError("len(seed) != nenvs")
 
-        thunks = [_thunk(**kwargs) for _ in range(nenvs)]
+        thunks = [_thunk(goal=goal, **kwargs) for _ in range(nenvs)]
         env = ParallelEnvBatch(make_env=thunks, seeds=seed)
 
         if summaries:
-            env = TensorboardSummaries(env, prefix="_".join(map(str, goal)))
+            goal_name = "_".join(map(str, goal))
+            env = TensorboardSummaries(env, prefix=goal_name)
 
         return env
 
