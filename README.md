@@ -83,7 +83,7 @@
 - `dt.py` - архитектура DT
 - `utils.py` - все остальные вспомагательные функции (eval для A3C и eval для DT)
 
-Google-диск со всеми видео и tensorboard ивентами: [ссылка](ССЫЛКА)
+Google-диск со всеми видео и tensorboard ивентами: [ссылка](https://drive.google.com/drive/folders/1E7glxXxkCXufiq6AubQPyqZ-wvX2Rg_-?usp=sharing)
 
 - eval у A3C - усредненные значения по параллельным средам (награды также усреднены за последние 10 эпизодов в каждой среде)
 
