@@ -12,6 +12,10 @@ src/videos/*
 #train histories
 src/histories/*
 
+#pytorch files
+*.pt
+*.pth
+
 .DS_Store
 
 # C extensions

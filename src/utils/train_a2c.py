@@ -1,14 +1,15 @@
 import os
+
 import numpy as np
 import torch
 from tensorboardX import SummaryWriter
 from tqdm import trange
 
 from src.utils.custom_transforms import ComputeValueTargets, MergeTimeBatch
-from utils.a2c import A2C, MLP_model, Policy
 from src.utils.runners import EnvRunner
 from src.utils.utils import visualize_policy
 from src.utils.wrappers import make_parallel_env
+from utils.a2c import A2C, MLP_model, Policy
 
 
 def train_A2C(goal):
